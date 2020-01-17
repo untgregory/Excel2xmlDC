@@ -1,15 +1,15 @@
 # Split XML containing many <mods> elements into invidual files
 # Modified from script found here: http://stackoverflow.com/questions/36155049/splitting-xml-file-into-multiple-at-given-tags
 # by Bill Levay for California Historical Society
+# Modified for use of in a NOVA public library and updated for Python 3 by Gregory Pierce
 
 import os, lxml.etree as ET
-# uncomment below modules if doing MODS cleanup on existing Islandora objects
-import codecs, json
 
-output_path = 'C:\\Users\\Staff\\Desktop\\Metadata\\SplitDC_XML\\'
+# output and source paths are for working within a server and should be changed
+output_path = 'S:\\Digitization\\Metadata\\tools\\XMLcreator\\SplitDC_XML\\'
 
 # parse source.xml with lxml
-tree = ET.parse('DCsource.xml')
+tree = ET.parse('S:\\Digitization\\Metadata\\tools\\XMLcreator\\DCsource.xml')
 
 # start cleanup
 # remove any element tails
@@ -58,19 +58,6 @@ print("XML is now clean")
 # parse the clean xml
 cleanxml = ET.iterparse('clean.xml', events=('end', ))
 
-###
-# uncomment this section if doing MODS cleanup on existing Islandora objects
-# getting islandora IDs for existing collections
-###
-# item_list = []
-
-# json_path = 'C:\\mods\\data.json'
-
-# with codecs.open(json_path, encoding='utf-8') as filename:
-#     item_list = json.load(filename)
-# filename.close
-###
-
 # find the <mods> nodes
 for event, elem in cleanxml:
     if elem.tag == 'record':
@@ -80,21 +67,9 @@ for event, elem in cleanxml:
         identifier = elem.find('{http://purl.org/dc/elements/1.1/}identifier').text
         filename = format(identifier + "_DC.xml")
 
-        ### 
-        # uncomment this section if doing MODS cleanup on existing Islandora objects
-        # look through the list of object metadata and get the islandora ID by matching the digital object ID
-        ###
-        # for item in item_list:
-        #     local_ID = item["identifier-type:local"]
-        #     islandora_ID = item["PID"]
-
-        #     if identifier == local_ID:
-        #         filename = format(islandora_ID + "_MODS.xml")
-        ###
-
         # write out to new file
         with open(output_path+filename, 'wb') as f:
-            f.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            f.write("<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n".encode("UTF-8"))
             f.write(ET.tostring(elem, pretty_print = True))
         print("Writing", filename)
 
